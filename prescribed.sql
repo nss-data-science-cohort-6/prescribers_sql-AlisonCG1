@@ -28,11 +28,13 @@
 
 --b. Which specialty had the most total number of claims for opioids?
 
-SELECT opioid_drug_flag AS opioids, specialty_description AS specialty
-FROM prescriber
-INNER JOIN  drug
-ON
+SELECT specialty_description, SUM(total_claim_count) as total_claim
+FROM prescription AS pn
+LEFT JOIN prescriber AS pr
+USING(npi)
+LEFT JOIN drug AS dg
+USING(drug_name)
 WHERE opioid_drug_flag = 'Y'
-GROUP BY specialty_description 
-
---ORDER BY total_specialty; 
+GROUP BY specialty_description
+ORDER BY total_claim DESC
+LIMIT 10;
