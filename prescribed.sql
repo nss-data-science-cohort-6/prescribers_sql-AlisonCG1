@@ -28,13 +28,66 @@
 
 --b. Which specialty had the most total number of claims for opioids?
 
-SELECT specialty_description, SUM(total_claim_count) as total_claim
-FROM prescription AS pn
-LEFT JOIN prescriber AS pr
+--SELECT specialty_description, SUM(total_claim_count) as total_claim
+--FROM prescription 
+--LEFT JOIN prescriber 
+--USING(npi)
+--LEFT JOIN drug 
+--USING(drug_name)
+--WHERE opioid_drug_flag = 'Y'
+--GROUP BY specialty_description
+--ORDER BY total_claim DESC
+--LIMIT 10;
+
+
+--c. Challenge Question: Are there any specialties that appear in the prescriber table that have no associated prescriptions in the prescription table?
+--SELECT specialty_description, SUM(total_claim_count) AS total_specialty
+--FROM prescriber 
+--FULL JOIN prescription 
+--USING (npi)
+--WHERE total_claim_count IS NULL
+--GROUP BY specialty_description
+--ORDER BY total_specialty; 
+
+--d. Difficult Bonus: Do not attempt until you have solved all other problems! For each specialty, report the percentage of total claims by that specialty which are for opioids. Which specialties have a high percentage of opioids?
+-- I need two numbers: Total opioids by specialty and Total claims by specialty 
+-- Divide first number with the second. * 100
+
+--SELECT specialty_description, SUM(total_claim_count) AS total_opioid_claim
+--FROM prescription 
+--LEFT JOIN prescriber 
+--USING(npi)
+--LEFT JOIN drug 
+--USING(drug_name)
+--WHERE opioid_drug_flag = 'Y'
+--GROUP BY specialty_description
+--ORDER BY total_claim DESC
+--LIMIT 10;
+--INTERSECT 
+--SELECT specialty_description, SUM(total_claim_count) AS total_specialty
+--FROM prescription 
+--LEFT JOIN prescriber 
+--USING(npi)
+--LEFT JOIN drug 
+--USING(drug_name)
+--GROUP BY specialty_description
+
+SELECT t1.specialty_description, t1.total_opioid_claim, t2.total_specialty, ROUND(t1.total_opioid_claim * 100.0 / t2.total_specialty, 1) AS Percent
+FROM 
+    (SELECT specialty_description, SUM(total_claim_count) AS total_opioid_claim
+FROM prescription 
+LEFT JOIN prescriber 
 USING(npi)
-LEFT JOIN drug AS dg
+LEFT JOIN drug 
 USING(drug_name)
 WHERE opioid_drug_flag = 'Y'
-GROUP BY specialty_description
-ORDER BY total_claim DESC
-LIMIT 10;
+GROUP BY specialty_description) AS t1
+LEFT JOIN
+    (SELECT specialty_description, SUM(total_claim_count) AS total_specialty
+FROM prescription 
+LEFT JOIN prescriber 
+USING(npi)
+LEFT JOIN drug 
+USING(drug_name)
+GROUP BY specialty_description) AS t2
+ON (t1.specialty_description = t2.specialty_description);
